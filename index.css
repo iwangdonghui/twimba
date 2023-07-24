@@ -130,3 +130,7 @@ button{
 .hidden{
     display: none;
 }
+
+.replies-hidden {
+    display: all;
+  }

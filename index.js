@@ -42,7 +42,9 @@ function handleRetweetClick(tweetId) {
 }
 
 function handleReplyClick(replyId) {
+    
   document.getElementById(`replies-${replyId}`).classList.toggle("hidden");
+  
 }
 
 function handleTweetBtnClick() {
@@ -70,13 +72,13 @@ function getFeedHtml() {
 
   tweetsData.forEach(function (tweet) {
     let likeIconClass = "";
-
+    // set value of likeIconClass to liked
     if (tweet.isLiked) {
       likeIconClass = "liked";
     }
 
     let retweetIconClass = "";
-
+    // set value of likeIconClass to retweeted
     if (tweet.isRetweeted) {
       retweetIconClass = "retweeted";
     }
@@ -95,19 +97,14 @@ function getFeedHtml() {
                     </div>
                 </div>
             </div>
+            
             `;
       });
-    } else if (tweet.replies.length == 0){
-        repliesHtml += `
-        <div class="tweet-reply">
-            <img src="images/scrimbalogo.png" class="profile-pic">
-            <textarea placeholder="Tweet your reply!" id="tweet-input"></textarea>
-        </div>
-        `
     }
     feedHtml += `
+    
         <div class="tweet">
-            <div class="tweet-inner">
+            <div class="tweet-inner"> 
                 <img src="${tweet.profilePic}" class="profile-pic">
                 <div>
                     <p class="handle">${tweet.handle}</p>
@@ -133,21 +130,63 @@ function getFeedHtml() {
                         </span>
                         
                     </div>
-
-                </div>
-                            
+                </div>          
             </div>
-            <div class="hidden" id="replies-${tweet.uuid}">
-                ${repliesHtml}
-            </div>   
-        </div>
+        </div>`;
+    
+        feedHtml += `
+        <div class="hidden" id="replies-${tweet.uuid}">
+          <div class="tweet-reply">
+            <img src="images/scrimbalogo.png" class="profile-pic">
+            
+            <textarea placeholder="Tweet your reply!" id="tweet-input-${tweet.uuid}"></textarea>
+            <button id="tweet-submit-${tweet.uuid}">Reply</button>
+          </div>
+          
+          <div class="replies-hidden">
+      `;
+      //add replies after reply box
+      for(let reply of tweet.replies) {
+        feedHtml += `
+          <div class="reply">
+             <img class="profile-pic" src="${reply.profilePic}"/>
+             <p class="handle">${reply.handle}</p>
+             <p class="reply-text">${reply.tweetText}</p>
+          </div>
         `;
+      }
+  
+      feedHtml += `</div>`;//closing tag for replies-hidden class
+      feedHtml += `</div>`; //closing tag for replies section
+  
   });
   return feedHtml;
 }
 
+function handleReplySubmit(tweetId) {
+    const replyInput = document.getElementById(`tweet-input-${tweetId}`);
+    const newReply = replyInput.value;
+    
+    if (newReply) {
+      const targetTweet = tweetsData.find((tweet) => tweet.uuid === tweetId);
+      targetTweet.replies.unshift({
+        handle: `@Scrimba`,
+        profilePic: `images/scrimbalogo.png`,
+        tweetText: newReply,
+        // add any other required fields here
+      });
+    
+      replyInput.value = "";
+      render();
+    }
+  }
+
 function render() {
   document.getElementById("feed").innerHTML = getFeedHtml();
+  tweetsData.forEach((tweet) => {
+    document.getElementById(`tweet-submit-${tweet.uuid}`)
+      .addEventListener("click", () => handleReplySubmit(tweet.uuid));
+  });
 }
 
 render();
